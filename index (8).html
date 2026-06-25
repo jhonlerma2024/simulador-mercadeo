@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de Mercadeo — ANI203</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --p:#7F77DD;--pl:#EEEDFE;--pd:#3C3489;--pm:#534AB7;
+  --tl:#E1F5EE;--td:#085041;--tm:#1D9E75;
+  --al:#FAEEDA;--ad:#633806;
+  --cl:#FAECE7;--cd:#712B13;
+  --bl:#E6F1FB;--bd:#0C447C;
+  --rl:#FCEBEB;--rd:#A32D2D;--rb:#F09595;
+  --bg:#fff;--bg2:#f7f7f5;--bg3:#f0efed;
+  --tx:#1a1a1a;--tx2:#6b6b6b;--tx3:#999;
+  --br:rgba(0,0,0,0.12);--br2:rgba(0,0,0,0.22);
+  --r:8px;--rl2:12px
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1c1c1c;--bg2:#252525;--bg3:#2e2e2e;
+  --tx:#f0f0f0;--tx2:#aaa;--tx3:#666;
+  --br:rgba(255,255,255,0.1);--br2:rgba(255,255,255,0.2);
+  --pl:#2a2850;--pd:#AFA9EC;--pm:#9B94E8;
+  --tl:#0a2a20;--td:#9FE1CB;--tm:#5DCAA5;
+  --al:#2a1e08;--ad:#FAC775;
+  --cl:#2a1208;--cd:#F5C4B3;
+  --bl:#0a1e2a;--bd:#B5D4F4;
+  --rl:#2a0808;--rd:#F7C1C1;--rb:#A32D2D
+}}
+html{font-size:16px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--tx);line-height:1.6;min-height:100vh}
+.hidden{display:none!important}
+
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem}
+.login-box{background:var(--bg);border:1px solid var(--br);border-radius:var(--rl2);padding:2rem;width:100%;max-width:420px;box-shadow:0 4px 24px rgba(0,0,0,.08)}
+.logo-icon{width:52px;height:52px;border-radius:var(--r);background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--p);margin-bottom:1rem}
+.tab-sw{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--br);border-radius:var(--r);overflow:hidden;margin-bottom:1.5rem}
+.tab-btn{padding:11px;border:none;cursor:pointer;font-size:14px;font-weight:500;background:var(--bg2);color:var(--tx2);font-family:inherit;transition:all .15s}
+.tab-btn.active{background:var(--p);color:#fff}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--br);background:var(--bg);gap:10px;flex-wrap:wrap;position:sticky;top:0;z-index:50}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-ic{width:36px;height:36px;border-radius:var(--r);background:var(--pl);display:flex;align-items:center;justify-content:center;color:var(--p);font-size:18px}
+.user-chip{display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--bg2);border-radius:20px;font-size:13px;border:1px solid var(--br)}
+.u-av{width:28px;height:28px;border-radius:50%;background:var(--pl);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--pd)}
+
+/* FORMS */
+.fl{font-size:13px;color:var(--tx2);display:block;margin-bottom:4px;margin-top:14px}
+.fl:first-child{margin-top:0}
+input[type=text],input[type=email],input[type=password],input[type=number],select,textarea{
+  width:100%;padding:10px 12px;border:1px solid var(--br2);border-radius:var(--r);
+  background:var(--bg);color:var(--tx);font-size:14px;font-family:inherit;outline:none;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--p)}
+textarea{resize:vertical;min-height:80px;line-height:1.5}
+
+/* BUTTONS */
+.btn{padding:9px 18px;border-radius:var(--r);border:1px solid var(--br2);background:var(--bg);font-size:14px;font-weight:500;color:var(--tx2);cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:7px;font-family:inherit}
+.btn:hover{background:var(--bg2)}
+.btn:active{transform:scale(.98)}
+.bp{background:var(--p);border-color:var(--p);color:#fff}
+.bp:hover{background:var(--pm)}
+.bs{padding:7px 14px;font-size:13px}
+.btn-row{display:flex;gap:8px;margin-top:1.25rem;justify-content:flex-end;flex-wrap:wrap}
+
+/* APP */
+.app{max-width:960px;margin:0 auto;padding:1rem 1rem 3rem}
+
+/* PROGRESS */
+.prog-wrap{margin:1rem 0 1.25rem}
+.prog-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--tx2);margin-bottom:6px}
+.prog-track{height:7px;background:var(--bg3);border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;background:var(--p);border-radius:4px;transition:width .4s ease}
+
+/* LAYOUT */
+.sim-layout{display:grid;grid-template-columns:205px 1fr;gap:1rem;align-items:start}
+.steps-nav{border:1px solid var(--br);border-radius:var(--rl2);overflow:hidden;background:var(--bg);position:sticky;top:72px}
+.step-item{padding:11px 14px;border-bottom:1px solid var(--br);cursor:pointer;font-size:13px;display:flex;align-items:center;gap:10px;color:var(--tx2);transition:background .1s}
+.step-item:last-child{border-bottom:none}
+.step-item.active{background:var(--pl);color:var(--pd)}
+.step-item.done .sico{background:var(--tm);color:#fff}
+.step-item.active .sico{background:var(--p);color:#fff}
+.sico{width:24px;height:24px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+
+/* PANEL */
+.panel{border:1px solid var(--br);border-radius:var(--rl2);background:var(--bg);padding:1.5rem}
+.ptitle{font-size:17px;font-weight:700;margin-bottom:3px}
+.psub{font-size:13px;color:var(--tx2);margin-bottom:1.25rem}
+
+/* RADIO */
+.rg{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.ropt{display:flex;align-items:center;gap:7px;padding:8px 14px;border:1px solid var(--br2);border-radius:var(--r);cursor:pointer;font-size:13px;color:var(--tx);transition:all .1s}
+.ropt input{width:auto;margin:0;accent-color:var(--p)}
+.ropt.sel{border-color:var(--p);background:var(--pl);color:var(--pd)}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cell{border:1px solid var(--br);border-radius:var(--r);padding:12px}
+.cell h4{font-size:13px;font-weight:600;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.dofa-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dc{border-radius:var(--r);padding:12px}
+.dc h4{font-size:13px;font-weight:600;margin-bottom:7px}
+.d-f{background:var(--tl)}.d-f h4{color:var(--td)}
+.d-o{background:var(--bl)}.d-o h4{color:var(--bd)}
+.d-d{background:var(--al)}.d-d h4{color:var(--ad)}
+.d-a{background:var(--cl)}.d-a h4{color:var(--cd)}
+.canvas-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.cc{border:1px solid var(--br);border-radius:var(--r);padding:10px}
+.cc h4{font-size:10px;font-weight:700;color:var(--tx2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
+.cw{grid-column:span 2}
+.cjm{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--br);border-radius:var(--r);overflow:hidden}
+.cjm-c{padding:10px;border-right:1px solid var(--br)}
+.cjm-c:last-child{border-right:none}
+.cjm-c h5{font-size:10px;font-weight:700;text-align:center;margin-bottom:7px;color:var(--pm);text-transform:uppercase;letter-spacing:.4px}
+.persona-wrap{display:grid;grid-template-columns:80px 1fr;gap:16px;background:var(--bg2);border-radius:var(--rl2);padding:16px;border:1px solid var(--br)}
+.p-av{width:64px;height:64px;border-radius:50%;background:var(--pl);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:var(--pd);border:2px solid var(--br2)}
+
+/* METRICS */
+.mg{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:1rem 0}
+.mc{background:var(--bg2);border-radius:var(--r);padding:14px}
+.mc .ml{font-size:12px;color:var(--tx2)}
+.mc .mv{font-size:17px;font-weight:700;margin-top:4px}
+
+/* AI */
+.ai-box{background:var(--bg2);border-radius:var(--r);padding:14px;margin-top:1rem;font-size:13px;line-height:1.8;border-left:3px solid var(--p)}
+.ai-lbl{font-size:11px;font-weight:700;color:var(--pm);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.dots{display:inline-flex;gap:5px;align-items:center}
+.dots span{width:7px;height:7px;border-radius:50%;background:var(--p);animation:bop .9s infinite}
+.dots span:nth-child(2){animation-delay:.2s}
+.dots span:nth-child(3){animation-delay:.4s}
+@keyframes bop{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-7px)}}
+
+/* ALERTS */
+.alert{padding:11px 14px;border-radius:var(--r);font-size:13px;display:flex;align-items:flex-start;gap:9px;margin-top:10px}
+.ae{background:var(--rl);border:1px solid var(--rb);color:var(--rd)}
+.ao{background:var(--tl);border:1px solid var(--tm);color:var(--td)}
+.ai2{background:var(--pl);border:1px solid var(--p);color:var(--pd)}
+
+/* BADGES */
+.badge{padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;display:inline-block}
+.bd{background:var(--tl);color:var(--td)}
+.bp2{background:var(--pl);color:var(--pd)}
+.bpe{background:var(--bg2);color:var(--tx2)}
+.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.tg-p{background:var(--pl);color:var(--pd)}
+
+/* STUDENT ROWS */
+.srow{border:1px solid var(--br);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--bg)}
+.sav{width:42px;height:42px;border-radius:50%;background:var(--pl);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:var(--pd);flex-shrink:0}
+.si{flex:1;min-width:160px}
+.sn{font-size:14px;font-weight:600}
+.sm{font-size:12px;color:var(--tx2);margin-top:2px}
+.pm{height:5px;background:var(--bg3);border-radius:3px;margin-top:7px;overflow:hidden;max-width:220px}
+.pmf{height:100%;background:var(--p);border-radius:3px}
+
+/* REPORT */
+.rh{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--br)}
+.rs{margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--br)}
+.rs:last-child{border-bottom:none}
+.rs h3{font-size:15px;font-weight:700;margin-bottom:8px}
+.rs p{font-size:13px;line-height:1.85;color:var(--tx2)}
+.rtbl{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+.rtbl th{text-align:left;padding:9px 10px;background:var(--bg2);font-weight:600;font-size:12px;color:var(--tx2);border-bottom:1px solid var(--br)}
+.rtbl td{padding:9px 10px;border-bottom:1px solid var(--br)}
+
+/* RESULT */
+.res-banner{background:var(--pl);border-radius:var(--rl2);padding:24px;text-align:center;margin-bottom:1.25rem}
+.res-score{font-size:60px;font-weight:700;color:var(--pd)}
+.fb-list{list-style:none;margin-top:10px}
+.fb-list li{padding:9px 12px;border-radius:var(--r);font-size:13px;margin-bottom:6px;display:flex;align-items:flex-start;gap:9px}
+.fok{background:var(--tl);color:var(--td)}
+.fwarn{background:var(--al);color:var(--ad)}
+.ftip{background:var(--pl);color:var(--pd)}
+
+/* RESPONSIVE */
+@media(max-width:650px){
+  .sim-layout{grid-template-columns:1fr}
+  .steps-nav{display:none}
+  .g2{grid-template-columns:1fr}
+  .g3{grid-template-columns:1fr 1fr}
+  .canvas-grid{grid-template-columns:repeat(2,1fr)}
+  .cjm{grid-template-columns:1fr}
+  .cjm-c{border-right:none;border-bottom:1px solid var(--br)}
+  .cjm-c:last-child{border-bottom:none}
+  .persona-wrap{grid-template-columns:1fr;text-align:center}
+  .login-box{padding:1.5rem}
+  .dofa-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="screen-login" class="login-wrap">
+  <div class="login-box">
+    <div class="logo-icon"><i class="ti ti-chart-line"></i></div>
+    <div style="font-size:22px;font-weight:700;margin-bottom:4px">Simulador de Mercadeo</div>
+    <div style="font-size:13px;color:var(--tx2);margin-bottom:1.5rem">Fundamentos de Mercadeo · ANI203 · Universidad del Pacífico</div>
+    <div class="tab-sw">
+      <button class="tab-btn active" id="lt-est" onclick="switchTab('est')"><i class="ti ti-school"></i> Soy estudiante</button>
+      <button class="tab-btn" id="lt-doc" onclick="switchTab('doc')"><i class="ti ti-chalkboard"></i> Soy docente</button>
+    </div>
+
+    <div id="form-est">
+      <label class="fl">Nombre completo</label>
+      <input type="text" id="st-nombre" placeholder="Ej. María Camila Torres Reyes" autocomplete="name">
+      <label class="fl">Correo electrónico</label>
+      <input type="email" id="st-email" placeholder="correo@estudiante.edu.co" autocomplete="email">
+      <label class="fl">Código de estudiante</label>
+      <input type="text" id="st-codigo" placeholder="Ej. 20241234">
+      <label class="fl">Grupo</label>
+      <select id="st-grupo">
+        <option value="">Selecciona tu grupo...</option>
+        <option>Grupo A</option><option>Grupo B</option>
+        <option>Grupo C</option><option>Grupo D</option><option>Grupo E</option>
+      </select>
+      <div id="st-err" class="alert ae hidden"></div>
+      <button class="btn bp" style="width:100%;margin-top:1.25rem;justify-content:center;padding:12px" onclick="loginEst()">
+        <i class="ti ti-login"></i> Comenzar simulador
+      </button>
+      <p style="font-size:12px;color:var(--tx2);text-align:center;margin-top:10px">
+        <i class="ti ti-device-floppy"></i> Tu progreso se guarda automáticamente en tu dispositivo.
+      </p>
+    </div>
+
+    <div id="form-doc" class="hidden">
+      <label class="fl">Contraseña docente</label>
+      <div style="display:flex;gap:8px">
+        <input type="password" id="doc-pass" placeholder="Contraseña..." style="flex:1" onkeydown="if(event.key==='Enter')loginDoc()">
+        <button class="btn bs" onclick="togglePass()"><i class="ti ti-eye" id="eye-ic"></i></button>
+      </div>
+      <div class="alert ai2" style="margin-top:10px;font-size:12px">
+        <i class="ti ti-info-circle" style="flex-shrink:0"></i>
+        <span>Contraseña por defecto: <strong>mercadeo2025</strong><br>Para cambiarla edita la variable <code style="background:var(--bg3);padding:1px 5px;border-radius:4px">PASS_DOC</code> en el código.</span>
+      </div>
+      <div id="doc-err" class="alert ae hidden"></div>
+      <button class="btn bp" style="width:100%;margin-top:1.25rem;justify-content:center;padding:12px" onclick="loginDoc()">
+        <i class="ti ti-dashboard"></i> Entrar al panel docente
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div id="topbar" class="topbar hidden">
+  <div class="brand">
+    <div class="brand-ic"><i class="ti ti-chart-line"></i></div>
+    <div>
+      <div style="font-size:15px;font-weight:700">Simulador de Mercadeo</div>
+      <div style="font-size:11px;color:var(--tx2)">ANI203 · Universidad del Pacífico</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="user-chip">
+      <div class="u-av" id="top-av"></div>
+      <span id="top-name" style="font-weight:500"></span>
+      <span id="top-grupo" class="tag tg-p hidden"></span>
+    </div>
+    <button class="btn bs" onclick="logout()"><i class="ti ti-logout"></i> Salir</button>
+  </div>
+</div>
+
+<!-- SIMULADOR ESTUDIANTE -->
+<div id="screen-sim" class="hidden">
+  <div class="app">
+    <div class="prog-wrap">
+      <div class="prog-labels"><span id="prog-lbl">Paso 1 de 9</span><span id="prog-pct">0%</span></div>
+      <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+    <div class="sim-layout">
+      <nav class="steps-nav">
+        <div class="step-item active" id="nav-0" onclick="goStep(0)"><div class="sico" id="si-0">1</div><span>Empresa</span></div>
+        <div class="step-item" id="nav-1" onclick="goStep(1)"><div class="sico" id="si-1">2</div><span>Investigación</span></div>
+        <div class="step-item" id="nav-2" onclick="goStep(2)"><div class="sico" id="si-2">3</div><span>Segmentación</span></div>
+        <div class="step-item" id="nav-3" onclick="goStep(3)"><div class="sico" id="si-3">4</div><span>Mercado meta</span></div>
+        <div class="step-item" id="nav-4" onclick="goStep(4)"><div class="sico" id="si-4">5</div><span>Buyer persona</span></div>
+        <div class="step-item" id="nav-5" onclick="goStep(5)"><div class="sico" id="si-5">6</div><span>Customer Journey</span></div>
+        <div class="step-item" id="nav-6" onclick="goStep(6)"><div class="sico" id="si-6">7</div><span>Canvas</span></div>
+        <div class="step-item" id="nav-7" onclick="goStep(7)"><div class="sico" id="si-7">8</div><span>DOFA</span></div>
+        <div class="step-item" id="nav-8" onclick="goStep(8)"><div class="sico" id="si-8">9</div><span>PESTEL</span></div>
+      </nav>
+      <div class="panel" id="main-panel"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL DOCENTE -->
+<div id="screen-doc" class="hidden">
+  <div class="app">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:1rem 0">
+      <button class="btn bp" id="tb-est" onclick="docTab('est')"><i class="ti ti-users"></i> Estudiantes</button>
+      <button class="btn" id="tb-rep" onclick="docTab('rep')"><i class="ti ti-file-description"></i> Artículo de investigación</button>
+      <button class="btn" onclick="loadStudents()"><i class="ti ti-refresh"></i> Actualizar</button>
+    </div>
+    <div id="tt-est">
+      <div class="alert ai2" style="margin-bottom:1rem">
+        <i class="ti ti-info-circle" style="flex-shrink:0"></i>
+        <span>Los datos provienen del almacenamiento local de cada dispositivo. Para ver a todos los estudiantes en tiempo real desde cualquier dispositivo, configura Firebase (escríbeme y te ayudo).</span>
+      </div>
+      <div id="student-list"></div>
+    </div>
+    <div id="tt-rep" class="hidden">
+      <div class="panel" id="report-panel">
+        <p style="font-size:13px;color:var(--tx2)">Selecciona un estudiante y haz clic en "Ver informe" para generar el artículo de investigación con IA.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────
+const PASS_DOC = "mercadeo2025";
+const API_URL  = "https://api.anthropic.com/v1/messages";
+const MODEL    = "claude-sonnet-4-6";
+const STEPS    = 9;
+
+const STEP_META = [
+  ["Elige tu empresa","Selecciona una empresa de tu entorno cercano para analizar durante todo el simulador"],
+  ["Investigación de mercados","Define el tipo, proceso y metodología de investigación que aplicarás"],
+  ["Segmentación de mercados","Divide el mercado total en grupos con características comunes"],
+  ["Mercado meta","Elige el segmento al que tu empresa se dirigirá prioritariamente"],
+  ["Buyer persona","Construye el perfil detallado de tu cliente ideal"],
+  ["Customer Journey Map","Mapea el viaje del cliente desde que conoce tu empresa hasta la posventa"],
+  ["Modelo Canvas","Define los 9 bloques del modelo de negocio de tu empresa"],
+  ["Análisis DOFA","Identifica fortalezas, oportunidades, debilidades y amenazas"],
+  ["Matriz PESTEL","Analiza los factores externos del macroentorno de tu empresa"]
+];
+
+// ── ESTADO ──────────────────────────────────────
+let user = null, step = 0, ans = {}, saveT = null;
+
+function blank(){return{empresa:"",sector:"",ciudad:"",descripcion:"",tipoInv:"",objetivo:"",metodologia:"",preguntas:"",hallazgos:"",segDemo:"",segPsico:"",segGeo:"",segCond:"",meta:"",justMeta:"",tamano:"",pNombre:"",pEdad:"",pOcup:"",pNec:"",pFrus:"",pCan:"",cjmC:"",cjmCo:"",cjmD:"",cjmCa:"",cjmP:"",cvSocios:"",cvAct:"",cvRec:"",cvProp:"",cvRel:"",cvCan:"",cvSeg:"",cvCost:"",cvIng:"",dfFor:"",dfOp:"",dfDeb:"",dfAm:"",ptPol:"",ptEco:"",ptSoc:"",ptTec:"",ptEco2:"",ptLeg:""}}
+
+// ── STORAGE ─────────────────────────────────────
+function sKey(email){return"sim_"+email.replace(/[^a-z0-9]/gi,"_")}
+function sIdx(){try{return JSON.parse(localStorage.getItem("sim_idx"))||[]}catch(e){return[]}}
+function saveIdx(u){
+  let idx=sIdx();
+  if(!idx.find(x=>x.email===u.email))idx.push({nombre:u.nombre,email:u.email,codigo:u.codigo,grupo:u.grupo});
+  localStorage.setItem("sim_idx",JSON.stringify(idx))
+}
+function saveData(){
+  if(!user)return;
+  const d={...blank(),...ans,_step:step,_meta:{...user,ts:Date.now()}};
+  localStorage.setItem(sKey(user.email),JSON.stringify(d));
+  saveIdx(user)
+}
+function loadData(email){try{return JSON.parse(localStorage.getItem(sKey(email)))||null}catch(e){return null}}
+function scheduleSave(){clearTimeout(saveT);saveT=setTimeout(saveData,1200)}
+
+// ── AUTH ────────────────────────────────────────
+function switchTab(t){
+  document.getElementById("form-est").classList.toggle("hidden",t!=="est");
+  document.getElementById("form-doc").classList.toggle("hidden",t!=="doc");
+  document.getElementById("lt-est").classList.toggle("active",t==="est");
+  document.getElementById("lt-doc").classList.toggle("active",t!=="est")
+}
+function togglePass(){
+  const p=document.getElementById("doc-pass"),ic=document.getElementById("eye-ic");
+  p.type=p.type==="password"?"text":"password";
+  ic.className=p.type==="password"?"ti ti-eye":"ti ti-eye-off"
+}
+function showErr(id,msg){const e=document.getElementById(id);e.innerHTML='<i class="ti ti-alert-triangle"></i> '+msg;e.classList.remove("hidden")}
+function show(id){document.getElementById(id).classList.remove("hidden")}
+function hide(id){document.getElementById(id).classList.add("hidden")}
+
+function loginEst(){
+  const nombre=document.getElementById("st-nombre").value.trim();
+  const email=document.getElementById("st-email").value.trim().toLowerCase();
+  const codigo=document.getElementById("st-codigo").value.trim();
+  const grupo=document.getElementById("st-grupo").value;
+  hide("st-err");
+  if(!nombre){showErr("st-err","Ingresa tu nombre completo.");return}
+  if(!email||!email.includes("@")){showErr("st-err","Ingresa un correo válido.");return}
+  if(!codigo){showErr("st-err","Ingresa tu código de estudiante.");return}
+  if(!grupo){showErr("st-err","Selecciona tu grupo.");return}
+  user={nombre,email,codigo,grupo};
+  const saved=loadData(email);
+  ans=saved?{...blank(),...saved}:blank();
+  step=(saved&&saved._step)||0;
+  hide("screen-login");
+  showTopbar(nombre,grupo);
+  show("screen-sim");
+  renderStep();updateProg();updateNav()
+}
+
+function loginDoc(){
+  const p=document.getElementById("doc-pass").value;
+  hide("doc-err");
+  if(p!==PASS_DOC){showErr("doc-err","Contraseña incorrecta.");return}
+  hide("screen-login");
+  showTopbar("Docente","",false);
+  show("screen-doc");
+  loadStudents()
+}
+
+function logout(){
+  user=null;ans={};step=0;
+  hide("screen-sim");hide("screen-doc");hide("topbar");
+  show("screen-login");
+  document.getElementById("st-nombre").value="";
+  document.getElementById("st-email").value="";
+  document.getElementById("st-codigo").value="";
+  document.getElementById("st-grupo").value="";
+  document.getElementById("doc-pass").value=""
+}
+
+function showTopbar(name,grupo,showG=true){
+  show("topbar");
+  const init=name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
+  document.getElementById("top-av").textContent=init;
+  document.getElementById("top-name").textContent=name.split(" ")[0];
+  const g=document.getElementById("top-grupo");
+  if(showG&&grupo){g.textContent=grupo;g.classList.remove("hidden")}else{g.classList.add("hidden")}
+}
+
+// ── NAV ─────────────────────────────────────────
+function goStep(n){saveData();step=n;renderStep();updateProg();updateNav();window.scrollTo(0,0)}
+function nextStep(){saveData();if(step<STEPS-1){step++;renderStep();updateProg();updateNav();window.scrollTo(0,0)}else showResult()}
+function prevStep(){saveData();if(step>0){step--;renderStep();updateProg();updateNav();window.scrollTo(0,0)}}
+
+function updateProg(){
+  const pct=Math.round((step/(STEPS-1))*100);
+  document.getElementById("prog-fill").style.width=pct+"%";
+  document.getElementById("prog-pct").textContent=pct+"%";
+  document.getElementById("prog-lbl").textContent="Paso "+(step+1)+" de "+STEPS
+}
+function updateNav(){
+  for(let i=0;i<STEPS;i++){
+    const el=document.getElementById("nav-"+i),ic=document.getElementById("si-"+i);
+    el.classList.remove("active","done");
+    if(i===step){el.classList.add("active");ic.innerHTML=i+1}
+    else if(i<step){el.classList.add("done");ic.innerHTML='<i class="ti ti-check" style="font-size:12px"></i>'}
+    else{ic.innerHTML=i+1}
+  }
+}
+
+// ── RENDER HELPERS ───────────────────────────────
+function v(k){return ans[k]||""}
+function fi(id,k,ph,t){t=t||"text";return`<input type="${t}" id="f-${id}" placeholder="${ph}" value="${v(k)}" oninput="ans['${k}']=this.value;scheduleSave()">`}
+function fa(id,k,ph){return`<textarea id="f-${id}" placeholder="${ph}" oninput="ans['${k}']=this.value;scheduleSave()">${v(k)}</textarea>`}
+function ro(k,val){return`<label class="ropt${v(k)===val?" sel":""}" onclick="selR('${k}','${val}',this)"><input type="radio" name="${k}" ${v(k)===val?"checked":""}> ${val}</label>`}
+function selR(k,val,el){ans[k]=val;scheduleSave();el.closest(".rg").querySelectorAll(".ropt").forEach(o=>o.classList.remove("sel"));el.classList.add("sel")}
+
+// ── STEPS ────────────────────────────────────────
+function renderStep(){
+  const[t,s]=STEP_META[step];
+  let h=`<div class="ptitle">${t}</div><div class="psub">${s}</div>`;
+  h+=[s0,s1,s2,s3,s4,s5,s6,s7,s8][step]();
+  h+=`<div class="btn-row">`;
+  if(step>0)h+=`<button class="btn" onclick="prevStep()"><i class="ti ti-arrow-left"></i> Anterior</button>`;
+  h+=`<button class="btn" onclick="aiAnz()"><i class="ti ti-sparkles"></i> Analizar con IA</button>`;
+  h+=step<STEPS-1?`<button class="btn bp" onclick="nextStep()">Guardar y continuar <i class="ti ti-arrow-right"></i></button>`:
+    `<button class="btn bp" onclick="showResult()">Ver mi resultado <i class="ti ti-trophy"></i></button>`;
+  h+=`</div><div id="ai-area"></div>`;
+  document.getElementById("main-panel").innerHTML=h
+}
+
+function s0(){return`
+  <label class="fl">Nombre de la empresa</label>${fi("empresa","empresa","Ej. Restaurante El Buen Sabor")}
+  <label class="fl">Sector</label>
+  <select id="f-sector" oninput="ans.sector=this.value;scheduleSave()">
+    ${["","Alimentos y bebidas","Comercio al por menor","Servicios de salud","Educación","Tecnología","Transporte","Turismo y hotelería","Belleza y estética","Entretenimiento","Construcción","Otro"].map(x=>`<option ${v("sector")===x?"selected":""}>${x}</option>`).join("")}
+  </select>
+  <label class="fl">Ciudad / municipio</label>${fi("ciudad","ciudad","Ej. Cali, Valle del Cauca")}
+  <label class="fl">Descripción de la empresa</label>${fa("descripcion","descripcion","¿Qué hace? ¿Cuánto tiempo lleva? ¿Cuántos empleados aproximadamente?")}`}
+
+function s1(){return`
+  <label class="fl">Tipo de investigación</label>
+  <div class="rg">${["Cuantitativa","Cualitativa","Mixta (ambas)"].map(x=>ro("tipoInv",x)).join("")}</div>
+  <label class="fl">Objetivo principal</label>${fa("objetivo","objetivo","¿Qué quieres descubrir sobre tu mercado?")}
+  <label class="fl">Metodología</label>
+  <div class="rg">${["Encuesta","Entrevista en profundidad","Grupo focal","Observación directa","Datos secundarios"].map(x=>ro("metodologia",x)).join("")}</div>
+  <label class="fl">Preguntas clave (mínimo 3)</label>${fa("preguntas","preguntas","1. ¿Qué factores influyen en la decisión de compra?\n2. ¿Con qué frecuencia compran?\n3. ¿Qué precio pagarían?")}
+  <label class="fl">Hallazgos o hipótesis preliminares</label>${fa("hallazgos","hallazgos","¿Qué esperas encontrar con tu investigación?")}`}
+
+function s2(){return`<div class="g2">
+  <div class="cell"><h4><i class="ti ti-user"></i> Demográfica</h4>${fa("segDemo","segDemo","Edad, género, ingresos, nivel educativo, ocupación...")}</div>
+  <div class="cell"><h4><i class="ti ti-brain"></i> Psicográfica</h4>${fa("segPsico","segPsico","Estilo de vida, valores, personalidad, intereses...")}</div>
+  <div class="cell"><h4><i class="ti ti-map-pin"></i> Geográfica</h4>${fa("segGeo","segGeo","Barrio, ciudad, clima, densidad poblacional...")}</div>
+  <div class="cell"><h4><i class="ti ti-repeat"></i> Conductual</h4>${fa("segCond","segCond","Frecuencia de compra, lealtad, beneficios buscados...")}</div>
+</div>`}
+
+function s3(){return`
+  <label class="fl">Segmento(s) como mercado meta</label>${fa("meta","meta","Describe el grupo prioritario al que se dirige tu empresa...")}
+  <label class="fl">Justificación de la elección</label>${fa("justMeta","justMeta","¿Por qué este segmento? Considera tamaño, accesibilidad, rentabilidad...")}
+  <label class="fl">Tamaño estimado (clientes potenciales)</label>${fi("tamano","tamano","Ej. 5000","number")}`}
+
+function s4(){return`<div class="persona-wrap">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+    <div class="p-av" id="p-av">${v("pNombre")?v("pNombre")[0].toUpperCase():"?"}</div>
+    <input type="text" id="f-pNombre" placeholder="Nombre..." style="text-align:center;font-weight:600;width:100px;font-size:14px" value="${v("pNombre")}"
+      oninput="ans.pNombre=this.value;scheduleSave();document.getElementById('p-av').textContent=this.value?this.value[0].toUpperCase():'?'">
+  </div>
+  <div>
+    <label class="fl">Edad y ocupación</label>
+    <div style="display:flex;gap:8px">
+      ${fi("pEdad","pEdad","Edad","number")}
+      <input type="text" id="f-pOcup" placeholder="Ocupación" style="flex:2" value="${v("pOcup")}" oninput="ans.pOcup=this.value;scheduleSave()">
+    </div>
+    <label class="fl">Necesidades y motivaciones</label>${fa("pNec","pNec","¿Qué necesita? ¿Qué lo motiva a comprar?")}
+    <label class="fl">Frustraciones y puntos de dolor</label>${fa("pFrus","pFrus","¿Qué le frustra? ¿Qué problema resuelve tu empresa?")}
+    <label class="fl">Canales y medios que usa</label>${fa("pCan","pCan","Instagram, WhatsApp, referencias, tienda física...")}
+  </div>
+</div>`}
+
+function s5(){const st=[["cjmC","Conciencia","¿Cómo se entera?"],["cjmCo","Consideración","¿Cómo evalúa?"],["cjmD","Decisión","¿Qué lo convence?"],["cjmCa","Compra","¿Cómo compra?"],["cjmP","Posventa","¿Qué pasa después?"]];
+return`<div class="cjm">${st.map(([k,l,p])=>`<div class="cjm-c"><h5>${l}</h5><textarea id="f-${k}" placeholder="${p}" style="width:100%;min-height:90px;font-size:12px" oninput="ans['${k}']=this.value;scheduleSave()">${v(k)}</textarea></div>`).join("")}</div>`}
+
+function s6(){const bl=[["cvSocios","Socios clave",""],["cvAct","Actividades clave",""],["cvProp","Propuesta de valor","cw"],["cvRel","Relaciones clientes",""],["cvSeg","Segmentos",""],["cvRec","Recursos clave",""],["cvCan","Canales",""],["cvCost","Estructura de costos","cw"],["cvIng","Fuentes de ingresos","cw"]];
+return`<div class="canvas-grid">${bl.map(([k,l,x])=>`<div class="cc ${x}"><h4>${l}</h4><textarea id="f-${k}" placeholder="${l}..." style="min-height:55px;font-size:12px;width:100%" oninput="ans['${k}']=this.value;scheduleSave()">${v(k)}</textarea></div>`).join("")}</div>`}
+
+function s7(){return`<div class="dofa-grid">
+  <div class="dc d-f"><h4><i class="ti ti-star"></i> Fortalezas</h4>${fa("dfFor","dfFor","Ventajas internas de la empresa...")}</div>
+  <div class="dc d-o"><h4><i class="ti ti-trending-up"></i> Oportunidades</h4>${fa("dfOp","dfOp","Factores externos favorables...")}</div>
+  <div class="dc d-d"><h4><i class="ti ti-alert-triangle"></i> Debilidades</h4>${fa("dfDeb","dfDeb","Limitaciones internas...")}</div>
+  <div class="dc d-a"><h4><i class="ti ti-flame"></i> Amenazas</h4>${fa("dfAm","dfAm","Factores externos desfavorables...")}</div>
+</div>`}
+
+function s8(){const f=[["ptPol","Político","ti-building-bank"],["ptEco","Económico","ti-currency-dollar"],["ptSoc","Social","ti-users"],["ptTec","Tecnológico","ti-cpu"],["ptEco2","Ecológico","ti-leaf"],["ptLeg","Legal","ti-gavel"]];
+return`<div class="g3">${f.map(([k,l,ic])=>`<div class="cell"><h4><i class="ti ${ic}"></i> ${l}</h4><textarea id="f-${k}" placeholder="Factores ${l.toLowerCase()}s..." style="min-height:75px;font-size:12px;width:100%" oninput="ans['${k}']=this.value;scheduleSave()">${v(k)}</textarea></div>`).join("")}</div>`}
+
+// ── AI ───────────────────────────────────────────
+async function aiAnz(){
+  saveData();
+  const area=document.getElementById("ai-area");
+  area.innerHTML=`<div class="ai-box"><div class="ai-lbl"><i class="ti ti-sparkles"></i> Analizando con IA</div><div class="dots"><span></span><span></span><span></span></div></div>`;
+  const[t]=STEP_META[step];
+  const prompt=`Eres un asesor de mercadeo universitario. El estudiante ${user.nombre} (${user.grupo}) trabaja en el paso "${t}" del simulador de Fundamentos de Mercadeo ANI203.
+Empresa: ${ans.empresa||"N/A"} | Sector: ${ans.sector||"N/A"} | Ciudad: ${ans.ciudad||"N/A"}
+Datos del paso: ${JSON.stringify(ans).slice(0,600)}
+Proporciona en español:
+1. Evaluación breve de lo ingresado (1-2 oraciones)
+2. Dos o tres sugerencias específicas y concretas de mejora
+3. Una pregunta reflexiva para profundizar
+Máximo 140 palabras. Tono pedagógico y motivador.`;
+  try{
+    const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:MODEL,max_tokens:1000,messages:[{role:"user",content:prompt}]})});
+    const d=await r.json();
+    const txt=d.content?.map(c=>c.text||"").join("")||"Sin respuesta.";
+    area.innerHTML=`<div class="ai-box"><div class="ai-lbl"><i class="ti ti-sparkles"></i> Retroalimentación pedagógica</div>${txt.replace(/\n/g,"<br>")}</div>`
+  }catch(e){
+    area.innerHTML=`<div class="ai-box"><div class="ai-lbl">Error</div>No se pudo conectar con el servicio de IA. Verifica tu conexión a internet.</div>`
+  }
+}
+
+// ── RESULTADO ────────────────────────────────────
+function showResult(){
+  saveData();
+  const ks=Object.keys(blank());
+  const filled=ks.filter(k=>ans[k]&&String(ans[k]).trim()).length;
+  const pct=Math.round((filled/ks.length)*100);
+  document.getElementById("main-panel").innerHTML=`
+    <div class="res-banner">
+      <div class="res-score">${pct}%</div>
+      <div style="font-size:15px;color:var(--pd);margin-top:4px">Completitud de tu análisis de mercadeo</div>
+      <div style="font-size:13px;color:var(--pm);margin-top:6px"><strong>${ans.empresa||"—"}</strong> · ${ans.sector||"—"} · ${user.grupo}</div>
+    </div>
+    <div class="mg">
+      <div class="mc"><div class="ml">Estudiante</div><div class="mv" style="font-size:14px">${user.nombre}</div></div>
+      <div class="mc"><div class="ml">Correo</div><div class="mv" style="font-size:13px">${user.email}</div></div>
+      <div class="mc"><div class="ml">Investigación</div><div class="mv" style="font-size:14px">${ans.tipoInv||"—"}</div></div>
+      <div class="mc"><div class="ml">Buyer persona</div><div class="mv" style="font-size:14px">${ans.pNombre||"—"}</div></div>
+    </div>
+    <ul class="fb-list" style="margin-top:1rem">
+      ${pct>=80?'<li class="fok"><i class="ti ti-trophy"></i> Excelente trabajo. Completaste la mayoría de los módulos.</li>':""}
+      ${ans.empresa?`<li class="fok"><i class="ti ti-check"></i> Empresa seleccionada: ${ans.empresa}</li>`:'<li class="fwarn"><i class="ti ti-alert-triangle"></i> Falta ingresar la empresa.</li>'}
+      ${ans.tipoInv?`<li class="fok"><i class="ti ti-check"></i> Investigación ${ans.tipoInv.toLowerCase()} definida.</li>`:'<li class="fwarn"><i class="ti ti-alert-triangle"></i> Falta seleccionar el tipo de investigación.</li>'}
+      ${ans.meta?'<li class="fok"><i class="ti ti-check"></i> Mercado meta definido.</li>':`<li class="fwarn"><i class="ti ti-alert-triangle"></i> Falta definir el mercado meta.</li>`}
+      ${ans.pNombre?`<li class="fok"><i class="ti ti-check"></i> Buyer persona creado: ${ans.pNombre}.</li>`:'<li class="fwarn"><i class="ti ti-alert-triangle"></i> Falta el buyer persona.</li>'}
+      ${ans.dfFor?'<li class="fok"><i class="ti ti-check"></i> Análisis DOFA completado.</li>':`<li class="fwarn"><i class="ti ti-alert-triangle"></i> Falta el análisis DOFA.</li>`}
+      ${ans.ptPol?'<li class="fok"><i class="ti ti-check"></i> Matriz PESTEL completada.</li>':`<li class="fwarn"><i class="ti ti-alert-triangle"></i> Falta la matriz PESTEL.</li>`}
+      <li class="ftip"><i class="ti ti-device-floppy"></i> Tu análisis quedó guardado en este dispositivo.</li>
+    </ul>
+    <div class="btn-row">
+      <button class="btn" onclick="step=0;renderStep();updateProg();updateNav()"><i class="ti ti-refresh"></i> Repasar módulos</button>
+    </div>`
+}
+
+// ── PANEL DOCENTE ────────────────────────────────
+function docTab(t){
+  document.getElementById("tt-est").classList.toggle("hidden",t!=="est");
+  document.getElementById("tt-rep").classList.toggle("hidden",t!=="rep");
+  document.getElementById("tb-est").className="btn"+(t==="est"?" bp":"");
+  document.getElementById("tb-rep").className="btn"+(t==="rep"?" bp":"")
+}
+
+function loadStudents(){
+  const wrap=document.getElementById("student-list");
+  const idx=sIdx();
+  if(!idx.length){wrap.innerHTML=`<div class="alert ai2"><i class="ti ti-users" style="flex-shrink:0"></i> Aún no hay estudiantes registrados en este dispositivo. Los estudiantes deben usar el simulador desde este mismo navegador para aparecer aquí.</div>`;return}
+  const ks=Object.keys(blank());
+  wrap.innerHTML=`<div style="font-size:13px;color:var(--tx2);margin-bottom:10px">${idx.length} estudiante(s) registrado(s)</div>`+
+  idx.map(s=>{
+    const d=loadData(s.email)||{};
+    const filled=ks.filter(k=>d[k]&&String(d[k]).trim()).length;
+    const pct=Math.round((filled/ks.length)*100);
+    const st=d._step||0;
+    const init=s.nombre.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
+    const ts=d._meta&&d._meta.ts?new Date(d._meta.ts).toLocaleString("es-CO",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):"—";
+    const bc=pct>=80?"bd":pct>0?"bp2":"bpe";
+    const bt=pct>=80?"Completo":pct>0?`En progreso ${pct}%`:"Pendiente";
+    return`<div class="srow">
+      <div class="sav">${init}</div>
+      <div class="si">
+        <div class="sn">${s.nombre}</div>
+        <div class="sm">${s.email} · ${s.codigo} · ${s.grupo}</div>
+        <div class="sm">Empresa: <strong>${d.empresa||"—"}</strong> · ${d.sector||"—"} · Paso ${st+1}/9 · ${ts}</div>
+        <div class="pm"><div class="pmf" style="width:${pct}%"></div></div>
+      </div>
+      <span class="badge ${bc}">${bt}</span>
+      <button class="btn bs" onclick="verInforme('${s.email}')"><i class="ti ti-file-description"></i> Ver informe</button>
+    </div>`
+  }).join("")
+}
+
+async function verInforme(email){
+  docTab("rep");
+  const panel=document.getElementById("report-panel");
+  panel.innerHTML=`<div style="text-align:center;padding:2rem"><div class="dots" style="justify-content:center;margin-bottom:10px"><span></span><span></span><span></span></div><div style="font-size:13px;color:var(--tx2)">Generando artículo de investigación con IA...</div></div>`;
+  const a=loadData(email)||{};
+  const m=a._meta||{};
+  const ks=Object.keys(blank());
+  const filled=ks.filter(k=>a[k]&&String(a[k]).trim()).length;
+  const pct=Math.round((filled/ks.length)*100);
+  const prompt=`Eres un experto en mercadeo y docencia universitaria colombiana. Genera un artículo de investigación académico en español para el docente de Fundamentos de Mercadeo ANI203, Universidad del Pacífico, basado en el análisis de un estudiante.
+
+DATOS DEL ESTUDIANTE:
+Nombre: ${m.nombre||"N/A"} | Código: ${m.codigo||"N/A"} | Grupo: ${m.grupo||"N/A"} | Correo: ${m.email||email} | Completitud: ${pct}%
+
+ANÁLISIS REALIZADO:
+Empresa: ${a.empresa||"N/A"} | Sector: ${a.sector||"N/A"} | Ciudad: ${a.ciudad||"N/A"}
+Descripción: ${a.descripcion||"N/A"}
+Tipo investigación: ${a.tipoInv||"N/A"} | Metodología: ${a.metodologia||"N/A"}
+Objetivo: ${a.objetivo||"N/A"} | Preguntas: ${a.preguntas||"N/A"} | Hallazgos: ${a.hallazgos||"N/A"}
+Segmentación demográfica: ${a.segDemo||"N/A"} | Psicográfica: ${a.segPsico||"N/A"} | Geográfica: ${a.segGeo||"N/A"} | Conductual: ${a.segCond||"N/A"}
+Mercado meta: ${a.meta||"N/A"} | Justificación: ${a.justMeta||"N/A"} | Tamaño: ${a.tamano||"N/A"}
+Buyer persona: ${a.pNombre||"N/A"}, ${a.pEdad||"N/A"} años, ${a.pOcup||"N/A"} | Necesidades: ${a.pNec||"N/A"} | Frustraciones: ${a.pFrus||"N/A"} | Canales: ${a.pCan||"N/A"}
+CJM: Conciencia: ${a.cjmC||"N/A"} | Consideración: ${a.cjmCo||"N/A"} | Decisión: ${a.cjmD||"N/A"} | Compra: ${a.cjmCa||"N/A"} | Posventa: ${a.cjmP||"N/A"}
+Canvas: Propuesta: ${a.cvProp||"N/A"} | Socios: ${a.cvSocios||"N/A"} | Actividades: ${a.cvAct||"N/A"} | Recursos: ${a.cvRec||"N/A"} | Relaciones: ${a.cvRel||"N/A"} | Canales: ${a.cvCan||"N/A"} | Segmentos: ${a.cvSeg||"N/A"} | Costos: ${a.cvCost||"N/A"} | Ingresos: ${a.cvIng||"N/A"}
+DOFA: Fortalezas: ${a.dfFor||"N/A"} | Oportunidades: ${a.dfOp||"N/A"} | Debilidades: ${a.dfDeb||"N/A"} | Amenazas: ${a.dfAm||"N/A"}
+PESTEL: Político: ${a.ptPol||"N/A"} | Económico: ${a.ptEco||"N/A"} | Social: ${a.ptSoc||"N/A"} | Tecnológico: ${a.ptTec||"N/A"} | Ecológico: ${a.ptEco2||"N/A"} | Legal: ${a.ptLeg||"N/A"}
+
+Usa EXACTAMENTE estos separadores de sección:
+##SEC##Datos del estudiante y empresa analizada
+##SEC##Metodología de investigación de mercados
+##SEC##Análisis de segmentación y mercado meta
+##SEC##Perfil del consumidor — buyer persona y customer journey
+##SEC##Modelo de negocio Canvas
+##SEC##Análisis estratégico — DOFA y PESTEL
+##SEC##Evaluación pedagógica y recomendaciones
+
+En cada sección analiza el trabajo del estudiante, señala fortalezas y áreas de mejora, incluye calificación cualitativa: (Excelente) / (Satisfactorio) / (Necesita mejorar). Tono académico. 700-800 palabras total.`;
+  try{
+    const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:MODEL,max_tokens:1000,messages:[{role:"user",content:prompt}]})});
+    const d=await r.json();
+    const txt=d.content?.map(c=>c.text||"").join("")||"";
+    const secs=txt.split("##SEC##").filter(Boolean);
+    const now=new Date().toLocaleDateString("es-CO",{day:"2-digit",month:"long",year:"numeric"});
+    const bc=pct>=80?"bd":pct>0?"bp2":"bpe";
+    let html=`<div class="rh">
+      <div>
+        <div style="font-size:17px;font-weight:700">Artículo de investigación de mercadeo</div>
+        <div style="font-size:13px;color:var(--tx2);margin-top:3px">Fundamentos de Mercadeo ANI203 · Universidad del Pacífico · ${now}</div>
+        <div style="font-size:13px;color:var(--tx2);margin-top:2px">Estudiante: <strong>${m.nombre||email}</strong> · ${m.grupo||"—"} · Cód. ${m.codigo||"—"}</div>
+      </div>
+      <span class="badge ${bc}" style="font-size:13px;padding:6px 14px">${pct}% completado</span>
+    </div>`;
+    secs.forEach(sec=>{
+      const lines=sec.trim().split("\n");
+      const title=lines[0].trim();
+      const body=lines.slice(1).join("\n").trim();
+      html+=`<div class="rs"><h3>${title}</h3><p>${body.replace(/\n/g,"<br>")}</p></div>`
+    });
+    html+=`<div style="background:var(--bg2);border-radius:var(--r);padding:14px;margin-top:1rem">
+      <div style="font-size:13px;font-weight:700;margin-bottom:10px">Tabla de completitud por módulo</div>
+      <table class="rtbl"><tr><th>Módulo</th><th>Estado</th><th>Descripción</th></tr>
+      ${[["Empresa",a.empresa,"Empresa y sector"],["Investigación",a.objetivo,"Objetivo y metodología"],["Segmentación",a.segDemo,"Cuatro criterios"],["Mercado meta",a.meta,"Segmento objetivo"],["Buyer persona",a.pNombre,"Perfil del consumidor"],["Customer Journey",a.cjmC,"5 etapas del viaje"],["Modelo Canvas",a.cvProp,"9 bloques del modelo"],["DOFA",a.dfFor,"Factores internos/externos"],["PESTEL",a.ptPol,"Macroentorno"]].map(([mod,val,obs])=>`<tr><td>${mod}</td><td><span class="badge ${val?"bd":"bpe"}">${val?"Completado":"Pendiente"}</span></td><td style="font-size:12px;color:var(--tx2)">${obs}</td></tr>`).join("")}
+      </table></div>`;
+    panel.innerHTML=html
+  }catch(e){
+    panel.innerHTML=`<div class="alert ae"><i class="ti ti-alert-triangle"></i> Error generando el informe. Verifica la conexión a internet.</div>`
+  }
+}
+</script>
+</body>
+</html>
